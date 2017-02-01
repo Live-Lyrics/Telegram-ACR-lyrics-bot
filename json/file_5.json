@@ -1,0 +1,88 @@
+{
+    "metadata": {
+        "music": [
+            {
+                "acrid": "13ab00152de3f1eb62966c8b4e0ce327",
+                "album": {
+                    "name": "The Best Of Pink Floyd: A Foot In The Door (2011 Remastered Version)"
+                },
+                "artists": [
+                    {
+                        "name": "Pink Floyd"
+                    }
+                ],
+                "duration_ms": "428106",
+                "external_ids": {
+                    "isrc": "GBN9Y1100141",
+                    "upc": "5099968088552"
+                },
+                "external_metadata": {
+                    "deezer": {
+                        "album": {
+                            "id": 1307796
+                        },
+                        "artists": [
+                            {
+                                "id": 860
+                            }
+                        ],
+                        "genres": [
+                            {
+                                "id": 152
+                            }
+                        ],
+                        "track": {
+                            "id": 14250003
+                        }
+                    },
+                    "itunes": {
+                        "album": {
+                            "id": 1067444712
+                        },
+                        "artists": [
+                            {
+                                "id": 487143
+                            }
+                        ],
+                        "track": {
+                            "id": 1067444893
+                        }
+                    },
+                    "spotify": {
+                        "album": {
+                            "id": "6uGYCZLXw3wPFOSYcqLz9F"
+                        },
+                        "artists": [
+                            {
+                                "id": "0k17h0D3J5VfsdmQ1iZtE9"
+                            }
+                        ],
+                        "track": {
+                            "id": "23W5DHu31ZLW9q0p2wQxfN"
+                        }
+                    },
+                    "youtube": {
+                        "vid": "JwYX52BP2Sk"
+                    }
+                },
+                "genres": [
+                    {
+                        "name": "Rock"
+                    }
+                ],
+                "label": "Parlophone UK",
+                "play_offset_ms": 168620,
+                "release_date": "2011-11-07",
+                "result_from": 3,
+                "title": "Time (Edit) [2011 Remastered Version]"
+            }
+        ],
+        "timestamp_utc": "2017-02-01 09:48:22"
+    },
+    "result_type": 3,
+    "status": {
+        "code": 0,
+        "msg": "Success",
+        "version": "1.0"
+    }
+}
