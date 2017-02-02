@@ -10,8 +10,7 @@ import json
 # function to return lyrics grabbed from lyricwikia
 def LyricWikia(artist, title):
     proxy = urllib.request.getproxies()
-    url = 'http://lyrics.wikia.com/api.php?action=lyrics&artist={artist}&song={title}&fmt=json&func=getSong'.format(artist=artist,
-                                                                                                                    title=title).replace(" ","%20")
+    url = 'http://lyrics.wikia.com/api.php?action=lyrics&artist={artist}&song={title}&fmt=json&func=getSong'.format(artist=artist,                                                                                               title=title).replace(" ", "%20")
     r = requests.get(url, timeout=15, proxies=proxy)
     # We got some bad formatted JSON data... So we need to fix stuff :/
     returned = r.text

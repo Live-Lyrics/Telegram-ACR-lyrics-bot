@@ -1,10 +1,12 @@
+import re
+from bs4 import BeautifulSoup
 import json
 import lyrics as minilyrics
 import requests
 import telebot
 from acrcloud.recognizer import ACRCloudRecognizer
 
-token = "You token from Telegram"
+token = "Your token from Telegram"
 bot = telebot.TeleBot(token)
 
 # ACR cloud
@@ -15,10 +17,11 @@ config = {
     'access_secret': 'XXXXXXXX',
     'timeout': 5  # seconds
 }
+error = 'Could not find lyrics.'
 
 
 def media(data, keys):
-    for i in data["metadata"]["music"]:
+    for i in data['metadata']['music']:
         for key, value in i['external_metadata'].items():
             if keys == 'youtube' == key:
                 yid = value['vid']
@@ -28,19 +31,37 @@ def media(data, keys):
                 return sid
 
 
-def wikia(artist, song):
-    error = "Could not find lyrics."
-    lyrics = minilyrics.LyricWikia(artist, song)
-    if lyrics == "error":
+def musixmatch(artist, song):
+    try:
+        searchurl = f"https://www.musixmatch.com/search/{artist}-{song}/tracks"
+        header = {"User-Agent": "curl/7.9.8 (i686-pc-linux-gnu) libcurl 7.9.8 (OpenSSL 0.9.6b) (ipv6 enabled)"}
+        searchresults = requests.get(searchurl, headers=header)
+        soup = BeautifulSoup(searchresults.text, 'html.parser')
+        page = re.findall('"track_share_url":"(http[s?]://www\.musixmatch\.com/lyrics/.+?)","', soup.text)
+        url = page[0]
+        lyricspage = requests.get(url, headers=header)
+        soup = BeautifulSoup(lyricspage.text, 'html.parser')
+        lyrics = soup.text.split('"body":"')[1].split('","language"')[0]
+        lyrics = lyrics.replace("\\n", "\n")
+        lyrics = lyrics.replace("\\", "")
+    except Exception:
         lyrics = error
-        print('{} - {} not found in wikia'.format(artist, song))
+        print(f"{artist} - {song} not found in musixmatch")
+    return lyrics
+
+
+def wikia(artist, song):
+    lyrics = minilyrics.LyricWikia(artist, song)
+    if lyrics == 'error':
+        musixmatch(artist, song)
+        print(f"{artist} - {song} not found in wikia")
     return lyrics
 
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
     file_info = bot.get_file(message.voice.file_id)
-    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(token, file_info.file_path))
+    file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}')
     if file.status_code == 200:
         with open(file_info.file_path, 'wb') as f:
             for chunk in file:
@@ -49,31 +70,35 @@ def voice_processing(message):
     recogn = ACRCloudRecognizer(config)
     metadata = recogn.recognize_by_file(file_info.file_path, 0)
     data = json.loads(metadata)
+
     if data['status']['code'] == 0:
-        with open('json/{}.json'.format(file_info.file_path.split('/')[1].split('.')[0]), 'w',
-                  encoding='utf8') as outfile:
+        name_json = file_info.file_path.split('/')[1].split('.')[0]
+        with open(f'json/{name_json}.json', 'w', encoding='utf8') as outfile:
             json.dump(data, outfile, indent=4, sort_keys=True)
 
-        artist = data["metadata"]["music"][0]["artists"][0]["name"]
-        song = data["metadata"]["music"][0]["title"]
-        bot.send_message(message.chat.id, '{} - {}'.format(artist, song))
+        artist = data['metadata']['music'][0]['artists'][0]['name']
+        song = data['metadata']['music'][0]['title']
+        about = f"{artist} - {song}"
+        bot.send_message(message.chat.id, about)
 
-        text = wikia(artist, song)
-        bot.send_message(message.chat.id, text)
+        lyrics_user = wikia(artist, song)
+        bot.send_message(message.chat.id, lyrics_user)
 
         yid = media(data, 'youtube')
         if yid is not None:
-            bot.send_message(message.chat.id, 'https://www.youtube.com/watch?v=' + media(data, 'youtube'))
+            y_link = 'https://www.youtube.com/watch?v=' + yid
+            bot.send_message(message.chat.id, y_link)
         else:
-            print('{} - {} not found in youtube'.format(artist, song))
-
+            print(f"{artist} - {song} not found in youtube")
         sid = media(data, 'spotify')
         if sid is not None:
-            bot.send_message(message.chat.id, 'https://open.spotify.com/track/' + media(data, 'spotify'))
+            s_link = 'https://open.spotify.com/track/' + sid
+            bot.send_message(message.chat.id, s_link)
         else:
-            print('{} - {} not found in spotify'.format(artist, song))
+            print(f"{artist} - {song} not found in spotify")
     else:
         bot.send_message(message.chat.id, 'songs not found')
+        print(data)
 
 
 if __name__ == '__main__':

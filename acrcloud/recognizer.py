@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
 
-'''
+"""
     @author qinxue.pan E-mail: xue@acrcloud.com
     @version 1.0.0
     @create 2015.10.01
-'''
+"""
 
-import os
 import sys
 import hmac
 import time
@@ -20,35 +18,6 @@ import datetime
 
 import acrcloud_extr_tool
 
-'''
-Copyright 2015 ACRCloud Recognizer v1.0.0
-
-This module can recognize ACRCloud by most of audio/video file. 
-        Audio: mp3, wav, m4a, flac, aac, amr, ape, ogg ...
-        Video: mp4, mkv, wmv, flv, ts, avi ...
-
-Example:
-    config = {
-        'host':'ap-southeast-1.api.acrcloud.com',
-        'access_key':'XXXXXXXX',
-        'access_secret':'XXXXXXXX',
-        'timeout':5
-    }
-    re = ACRCloudRecognizer(config)
-
-    #recognize by file path, and skip 180 seconds from from the beginning of "aa.mp3".
-    print re.recognize_by_file('aa.mp3', 180)
-
-    buf = open('aa.mp3', 'rb').read()
-    #recognize by file_audio_buffer that read from file path, and skip 180 seconds from from the beginning of "aa.mp3".
-    print re.recognize_by_filebuffer(buf, 180)
-
-    #aa.wav is (RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 8000 Hz)
-    buf = open('aa.wav', 'rb').read()
-    buft = buf[1024000:192000+1024001]
-    recognize by audio_buffer(RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 8000 Hz)
-    print re.recognize(buft)
-'''
 
 class ACRCloudRecognizer:
     def __init__(self, config):
@@ -68,9 +37,10 @@ class ACRCloudRecognizer:
 
     def post_multipart(self, url, fields, files, timeout):
         content_type, body = self.encode_multipart_formdata(fields, files)
-        
+
         if not content_type and not body:
-            return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.HTTP_ERROR_CODE, 'encode_multipart_formdata error')
+            return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.HTTP_ERROR_CODE,
+                                                       'encode_multipart_formdata error')
 
         try:
             req = urllib.request.Request(url, data=body)
@@ -81,7 +51,7 @@ class ACRCloudRecognizer:
             return ares
         except Exception as e:
             return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.HTTP_ERROR_CODE, str(e))
-        
+
     def encode_multipart_formdata(self, fields, files):
         try:
             boundary = "*****2016.05.27.acrcloud.rec.copyright." + str(time.time()) + "*****"
@@ -103,7 +73,7 @@ class ACRCloudRecognizer:
                 L.append('Content-Type: application/octet-stream')
                 L.append(CRLF)
                 body = body + CRLF.join(L).encode('ascii') + value
-            body = body + (CRLF + '--' + boundary + '--' + CRLF + CRLF).encode('ascii')
+            body += (CRLF + '--' + boundary + '--' + CRLF + CRLF).encode('ascii')
             content_type = 'multipart/form-data; boundary=%s' % boundary
             return content_type, body
         except Exception as e:
@@ -117,20 +87,22 @@ class ACRCloudRecognizer:
         signature_version = "1"
         timestamp = int(time.mktime(datetime.datetime.utcfromtimestamp(time.time()).timetuple()))
         sample_bytes = str(len(query_data))
-        
-        string_to_sign = http_method+"\n"+http_url_file+"\n"+access_key+"\n"+data_type+"\n"+signature_version+"\n"+str(timestamp)
-        hmac_res = hmac.new(access_secret.encode('ascii'), string_to_sign.encode('ascii'), digestmod=hashlib.sha1).digest()
+
+        string_to_sign = http_method + "\n" + http_url_file + "\n" + access_key + "\n" + data_type + "\n" + signature_version + "\n" + str(
+            timestamp)
+        hmac_res = hmac.new(access_secret.encode('ascii'), string_to_sign.encode('ascii'),
+                            digestmod=hashlib.sha1).digest()
         sign = base64.b64encode(hmac_res).decode('ascii')
-    
-        fields = {'access_key':access_key, 
-                  'sample_bytes':sample_bytes, 
-                  'timestamp':str(timestamp), 
-                  'signature':sign, 
-                  'data_type':data_type, 
-                  "signature_version":signature_version}
+
+        fields = {'access_key': access_key,
+                  'sample_bytes': sample_bytes,
+                  'timestamp': str(timestamp),
+                  'signature': sign,
+                  'data_type': data_type,
+                  "signature_version": signature_version}
 
         server_url = 'http://' + host + http_url_file
-        res = self.post_multipart(server_url, fields, {"sample" : query_data}, timeout)
+        res = self.post_multipart(server_url, fields, {"sample": query_data}, timeout)
         return res
 
     def recognize(self, wav_audio_buffer):
@@ -192,6 +164,7 @@ class ACRCloudRecognizer:
         except Exception as e:
             return 0
 
+
 class ACRCloudStatusCode:
     HTTP_ERROR_CODE = 3000
     NO_RESULT_CODE = 1001
@@ -199,39 +172,19 @@ class ACRCloudStatusCode:
     UNKNOW_ERROR_CODE = 2010
     JSON_ERROR_CODE = 2002
 
-    CODE_MSG = { 
-        HTTP_ERROR_CODE : 'http error', 
-        NO_RESULT_CODE : 'no result', 
-        AUDIO_ERROR_CODE : 'audio error', 
-        UNKNOW_ERROR_CODE : 'unknow error',
-        JSON_ERROR_CODE : 'json error'
-    }   
+    CODE_MSG = {
+        HTTP_ERROR_CODE: 'http error',
+        NO_RESULT_CODE: 'no result',
+        AUDIO_ERROR_CODE: 'audio error',
+        UNKNOW_ERROR_CODE: 'unknow error',
+        JSON_ERROR_CODE: 'json error'
+    }
 
     @staticmethod
     def get_result_error(res_code, msg=''):
-        if ACRCloudStatusCode.CODE_MSG.get(res_code) == None:
+        if ACRCloudStatusCode.CODE_MSG.get(res_code) is None:
             return None
-        res = {'status':{'msg':ACRCloudStatusCode.CODE_MSG[res_code], 'code':res_code}}
+        res = {'status': {'msg': ACRCloudStatusCode.CODE_MSG[res_code], 'code': res_code}}
         if msg:
-            res = {'status':{'msg':ACRCloudStatusCode.CODE_MSG[res_code]+':'+msg, 'code':res_code}}
+            res = {'status': {'msg': ACRCloudStatusCode.CODE_MSG[res_code] + ':' + msg, 'code': res_code}}
         return json.dumps(res)
-
-
-if __name__ == '__main__':
-    config = {
-        'host':'ap-southeast-1.api.acrcloud.com',
-        'access_key':'XXXXXXXX',
-        'access_secret':'XXXXXXXX',
-        'timeout':5
-    }
-
-    
-    re = ACRCloudRecognizer(config)
-    buf = open(sys.argv[1], 'rb').read()
-    #buft = buf[1024000:192000+1024001]
-
-    acrcloud_extr_tool.set_debug()
-    #print(acrcloud_extr_tool.__doc__)
-    #print(re.recognize_by_file(sys.argv[1], 10))
-    print(re.recognize_by_filebuffer(buf, 10))
-    #print re.recognize(buft)
