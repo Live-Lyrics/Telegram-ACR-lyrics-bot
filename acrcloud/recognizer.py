@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-
 """
     @author qinxue.pan E-mail: xue@acrcloud.com
     @version 1.0.0
     @create 2015.10.01
 """
-
 import sys
 import hmac
 import time
@@ -67,11 +65,8 @@ class ACRCloudRecognizer:
             body = CRLF.join(L).encode('ascii')
 
             for (key, value) in list(files.items()):
-                L = []
-                L.append(CRLF + '--' + boundary)
-                L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, key))
-                L.append('Content-Type: application/octet-stream')
-                L.append(CRLF)
+                L = [CRLF + '--' + boundary, 'Content-Disposition: form-data; name="%s"; filename="%s"' % (key, key),
+                     'Content-Type: application/octet-stream', CRLF]
                 body = body + CRLF.join(L).encode('ascii') + value
             body += (CRLF + '--' + boundary + '--' + CRLF + CRLF).encode('ascii')
             content_type = 'multipart/form-data; boundary=%s' % boundary
@@ -109,7 +104,7 @@ class ACRCloudRecognizer:
         try:
             res = ''
             fp = acrcloud_extr_tool.create_fingerprint(wav_audio_buffer, False)
-            if fp == None:
+            if fp is None:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.AUDIO_ERROR_CODE)
             elif len(fp) <= 0:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.NO_RESULT_CODE)
@@ -126,7 +121,7 @@ class ACRCloudRecognizer:
         try:
             res = ''
             fp = acrcloud_extr_tool.create_fingerprint_by_file(file_path, start_seconds, rec_length, False)
-            if fp == None:
+            if fp is None:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.AUDIO_ERROR_CODE)
             elif len(fp) <= 0:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.NO_RESULT_CODE)
@@ -143,7 +138,7 @@ class ACRCloudRecognizer:
         try:
             res = ''
             fp = acrcloud_extr_tool.create_fingerprint_by_filebuffer(file_buffer, start_seconds, rec_length, False)
-            if fp == None:
+            if fp is None:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.AUDIO_ERROR_CODE)
             elif len(fp) <= 0:
                 return ACRCloudStatusCode.get_result_error(ACRCloudStatusCode.NO_RESULT_CODE)

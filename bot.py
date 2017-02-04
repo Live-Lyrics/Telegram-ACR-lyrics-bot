@@ -20,6 +20,27 @@ config = {
 error = 'Could not find lyrics.'
 
 
+def reg(s):
+    s = re.sub(r"[^\w\s]$", '', s)
+    s = s.replace('$', 's')
+    s = re.sub(r"[-./\s\W]", '_', s).lower()
+    return s
+
+
+def amalgama_lyrics(artist, song):
+    cn = artist[0].lower()
+    link = f"http://www.amalgama-lab.com/songs/{cn}/{reg(artist)}/{reg(song)}.html"
+    r = requests.get(link)
+    if r.status_code != 404:
+        soup = BeautifulSoup(r.text, "html.parser")  # make soup that is parse-able by bs
+        s = ''
+        for strong_tag in soup.find_all("div", class_="translate"):
+            s = s + strong_tag.text + '\n'
+        return s
+    else:
+        print(f"translate {artist} - {song} not found")
+
+
 def get_genres(data):
     for music_list in data["metadata"]["music"]:
         for music_metadata in music_list:
@@ -41,6 +62,9 @@ def media(data, keys):
             if keys == 'youtube' == key:
                 yid = value['vid']
                 return yid
+            if keys == 'deezer' == key:
+                did = value['track']['id']
+                return did
             if keys == 'spotify' == key:
                 sid = value['track']['id']
                 return sid
@@ -108,7 +132,17 @@ def voice_processing(message):
         genres = get_genres(data)
         if genres != 'Classical':
             lyrics_user = wikia(artist, song)
-            bot.send_message(message.chat.id, lyrics_user)
+            try:
+                bot.send_message(message.chat.id, lyrics_user)
+
+                translate = amalgama_lyrics(artist, song)
+                if translate is not None:
+                    bot.send_message(message.chat.id, translate)
+                else:
+                    bot.send_message(message.chat.id, 'Translate not found')
+            except Exception:
+                bot.send_message(message.chat.id, 'Song text is too long')
+
             yid = media(data, 'youtube')
             if yid is not None:
                 y_link = 'https://www.youtube.com/watch?v=' + yid
@@ -121,10 +155,17 @@ def voice_processing(message):
 
         sid = media(data, 'spotify')
         if sid is not None:
-            s_link = 'https://open.spotify.com/track/' + sid
+            s_link = f'https://open.spotify.com/track/{sid}'
             bot.send_message(message.chat.id, s_link)
         else:
             print(f"{artist} - {song} not found in spotify")
+
+        did = media(data, 'deezer')
+        if did is not None:
+            d_link = f'http://www.deezer.com/track/{str(did)}'
+            bot.send_message(message.chat.id, d_link)
+        else:
+            print(f"{artist} - {song} not found in deezer")
     else:
         bot.send_message(message.chat.id, 'songs not found')
 
