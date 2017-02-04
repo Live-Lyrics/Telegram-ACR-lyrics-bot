@@ -20,6 +20,21 @@ config = {
 error = 'Could not find lyrics.'
 
 
+def get_genres(data):
+    for music_list in data["metadata"]["music"]:
+        for music_metadata in music_list:
+            if music_metadata == "genres":
+                genres = music_list[music_metadata][0]["name"]
+                return genres
+
+
+def get_youtube(artist, song):
+    text = requests.get(f"https://www.youtube.com/results?search_query={artist} {song}").text
+    soup = BeautifulSoup(text, "html.parser")
+    yid = soup.find('a', href=re.compile('/watch'))['href']
+    return f'https://www.youtube.com{yid}'
+
+
 def media(data, keys):
     for i in data['metadata']['music']:
         for key, value in i['external_metadata'].items():
@@ -44,6 +59,7 @@ def musixmatch(artist, song):
         lyrics = soup.text.split('"body":"')[1].split('","language"')[0]
         lyrics = lyrics.replace("\\n", "\n")
         lyrics = lyrics.replace("\\", "")
+        print(f"{artist} - {song} found in musixmatch")
     except Exception:
         lyrics = error
         print(f"{artist} - {song} not found in musixmatch")
@@ -53,9 +69,14 @@ def musixmatch(artist, song):
 def wikia(artist, song):
     lyrics = minilyrics.LyricWikia(artist, song)
     if lyrics == 'error':
-        musixmatch(artist, song)
         print(f"{artist} - {song} not found in wikia")
+        lyrics = musixmatch(artist, song)
     return lyrics
+
+
+@bot.message_handler(content_types=['text'])
+def handle_text(message):
+    bot.send_message(message.chat.id, "Just send me voice message and i'll try to recognize the song!")
 
 
 @bot.message_handler(content_types=['voice'])
@@ -78,18 +99,26 @@ def voice_processing(message):
 
         artist = data['metadata']['music'][0]['artists'][0]['name']
         song = data['metadata']['music'][0]['title']
+        if song.count(" - ") == 1:
+                song, garbage = song.rsplit(" - ", 1)
+        song = re.sub("[(\[].*?[)\]]", "", song)
         about = f"{artist} - {song}"
         bot.send_message(message.chat.id, about)
 
-        lyrics_user = wikia(artist, song)
-        bot.send_message(message.chat.id, lyrics_user)
-
-        yid = media(data, 'youtube')
-        if yid is not None:
-            y_link = 'https://www.youtube.com/watch?v=' + yid
-            bot.send_message(message.chat.id, y_link)
+        genres = get_genres(data)
+        if genres != 'Classical':
+            lyrics_user = wikia(artist, song)
+            bot.send_message(message.chat.id, lyrics_user)
+            yid = media(data, 'youtube')
+            if yid is not None:
+                y_link = 'https://www.youtube.com/watch?v=' + yid
+                bot.send_message(message.chat.id, y_link)
+            else:
+                y_link = get_youtube(artist, song)
+                bot.send_message(message.chat.id, y_link)
         else:
-            print(f"{artist} - {song} not found in youtube")
+            bot.send_message(message.chat.id, 'this is classical melody')
+
         sid = media(data, 'spotify')
         if sid is not None:
             s_link = 'https://open.spotify.com/track/' + sid
@@ -98,7 +127,6 @@ def voice_processing(message):
             print(f"{artist} - {song} not found in spotify")
     else:
         bot.send_message(message.chat.id, 'songs not found')
-        print(data)
 
 
 if __name__ == '__main__':
