@@ -35,8 +35,11 @@ def amalgama_lyrics(artist, song):
         soup = BeautifulSoup(r.text, "html.parser")  # make soup that is parse-able by bs
         s = ''
         for strong_tag in soup.find_all("div", class_="translate"):
-            s = s + strong_tag.text + '\n'
-        return s
+            if '\n' in strong_tag.text:
+                s = s + strong_tag.text
+            else:
+                s = s + strong_tag.text + '\n'
+        return s + link
     else:
         print(f"translate {artist} - {song} not found")
 
@@ -87,20 +90,50 @@ def musixmatch(artist, song):
     except Exception:
         lyrics = error
         print(f"{artist} - {song} not found in musixmatch")
-    return lyrics
+    return lyrics + url
 
 
 def wikia(artist, song):
     lyrics = minilyrics.LyricWikia(artist, song)
+    url = "http://lyrics.wikia.com/%s:%s" % (artist.replace(' ', '_'), song.replace(' ', '_'))
     if lyrics == 'error':
         print(f"{artist} - {song} not found in wikia")
         lyrics = musixmatch(artist, song)
-    return lyrics
+    return lyrics + url
+
+
+def send_lyrics(message, artist, song):
+    lyrics_text = wikia(artist, song)
+    try:
+        bot.send_message(message.chat.id, lyrics_text)
+        lyrics_translate = amalgama_lyrics(artist, song)
+        if lyrics_translate is not None:
+            bot.send_message(message.chat.id, lyrics_translate)
+        else:
+            bot.send_message(message.chat.id, 'Translate not found')
+    except Exception:
+        bot.send_message(message.chat.id, 'Song text is too long')
 
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    bot.send_message(message.chat.id, "Just send me voice message and i'll try to recognize the song!")
+    first_word = message.text.split(' ', 1)[0]
+    if first_word.lower() == 'lyrics':
+        artist = ""
+        song = ""
+        songname = message.text.split(first_word + ' ', 1)[1]
+        if songname.count(" - ") == 1:
+            artist, song = songname.rsplit(" - ", 1)
+        if songname.count(" – ") == 1:
+            artist, song = songname.rsplit(" – ", 1)
+        if songname.count(" - ") == 2:
+            artist, song, garbage = songname.rsplit(" - ", 2)
+        if " / " in song:
+            song, garbage = song.rsplit(" / ", 1)
+        song = re.sub(' \(.*?\)', '', song, flags=re.DOTALL)
+        send_lyrics(message, artist, song)
+    else:
+        bot.send_message(message.chat.id, "Just send me voice message and i'll try to recognize the song!")
 
 
 @bot.message_handler(content_types=['voice'])
@@ -131,18 +164,7 @@ def voice_processing(message):
 
         genres = get_genres(data)
         if genres != 'Classical':
-            lyrics_user = wikia(artist, song)
-            try:
-                bot.send_message(message.chat.id, lyrics_user)
-
-                translate = amalgama_lyrics(artist, song)
-                if translate is not None:
-                    bot.send_message(message.chat.id, translate)
-                else:
-                    bot.send_message(message.chat.id, 'Translate not found')
-            except Exception:
-                bot.send_message(message.chat.id, 'Song text is too long')
-
+            send_lyrics(message, artist, song)
             yid = media(data, 'youtube')
             if yid is not None:
                 y_link = 'https://www.youtube.com/watch?v=' + yid

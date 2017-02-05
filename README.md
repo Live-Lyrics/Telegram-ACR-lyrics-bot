@@ -2,6 +2,8 @@
 Music recognition bot for Telegram Messenger. 
 
 It makes the process finding lyrics for any song as easy as ever.
+
+To find lyrics and translate send a voice or message in the formatin - Lyrics <song_name> - <artist_name>
  
 # Screenshots
 
@@ -11,8 +13,3 @@ It makes the process finding lyrics for any song as easy as ever.
 			<img src="https://raw.githubusercontent.com/andriyor/Telegram-ACR-lyrics-bot/master/screenshots/screenshot_2.png" width="400"/>
 		</div>
 </div>
-
-TODO:
-- [ ] Sending link to deezer and Google Play Music
-- [ ] Sending translated lyrics from amalgama-lab or lyrsense
-- [ ] Sending lyrics by commands
