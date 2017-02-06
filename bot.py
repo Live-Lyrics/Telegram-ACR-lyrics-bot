@@ -23,6 +23,7 @@ error = 'Could not find lyrics.'
 def reg(s):
     s = re.sub(r"[^\w\s]$", '', s)
     s = s.replace('$', 's')
+    s = s.replace("'", '')
     s = re.sub(r"[-./\s\W]", '_', s).lower()
     return s
 
@@ -56,7 +57,10 @@ def get_youtube(artist, song):
     text = requests.get(f"https://www.youtube.com/results?search_query={artist} {song}").text
     soup = BeautifulSoup(text, "html.parser")
     yid = soup.find('a', href=re.compile('/watch'))['href']
-    return f'https://www.youtube.com{yid}'
+    li = soup.find('ul', {'class': 'yt-lockup-meta-info'}).contents[1].text
+    views = int(''.join(filter(str.isdigit, li)))
+    if views > 100000:
+        return f'https://www.youtube.com{yid}'
 
 
 def media(data, keys):
@@ -88,18 +92,20 @@ def musixmatch(artist, song):
         lyrics = lyrics.replace("\\", "")
         print(f"{artist} - {song} found in musixmatch")
     except Exception:
-        lyrics = error
         print(f"{artist} - {song} not found in musixmatch")
+        return error
     return lyrics + url
 
 
 def wikia(artist, song):
     lyrics = minilyrics.LyricWikia(artist, song)
     url = "http://lyrics.wikia.com/%s:%s" % (artist.replace(' ', '_'), song.replace(' ', '_'))
-    if lyrics == 'error':
+    if lyrics != 'error':
+        return lyrics + url
+    else:
         print(f"{artist} - {song} not found in wikia")
         lyrics = musixmatch(artist, song)
-    return lyrics + url
+        return lyrics
 
 
 def send_lyrics(message, artist, song):
@@ -138,59 +144,67 @@ def handle_text(message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
-    file_info = bot.get_file(message.voice.file_id)
-    file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}')
-    if file.status_code == 200:
-        with open(file_info.file_path, 'wb') as f:
-            for chunk in file:
-                f.write(chunk)
-
-    recogn = ACRCloudRecognizer(config)
-    metadata = recogn.recognize_by_file(file_info.file_path, 0)
-    data = json.loads(metadata)
-
-    if data['status']['code'] == 0:
-        name_json = file_info.file_path.split('/')[1].split('.')[0]
-        with open(f'json/{name_json}.json', 'w', encoding='utf8') as outfile:
-            json.dump(data, outfile, indent=4, sort_keys=True)
-
-        artist = data['metadata']['music'][0]['artists'][0]['name']
-        song = data['metadata']['music'][0]['title']
-        if song.count(" - ") == 1:
-                song, garbage = song.rsplit(" - ", 1)
-        song = re.sub("[(\[].*?[)\]]", "", song)
-        about = f"{artist} - {song}"
-        bot.send_message(message.chat.id, about)
-
-        genres = get_genres(data)
-        if genres != 'Classical':
-            send_lyrics(message, artist, song)
-            yid = media(data, 'youtube')
-            if yid is not None:
-                y_link = 'https://www.youtube.com/watch?v=' + yid
-                bot.send_message(message.chat.id, y_link)
-            else:
-                y_link = get_youtube(artist, song)
-                bot.send_message(message.chat.id, y_link)
-        else:
-            bot.send_message(message.chat.id, 'this is classical melody')
-
-        sid = media(data, 'spotify')
-        if sid is not None:
-            s_link = f'https://open.spotify.com/track/{sid}'
-            bot.send_message(message.chat.id, s_link)
-        else:
-            print(f"{artist} - {song} not found in spotify")
-
-        did = media(data, 'deezer')
-        if did is not None:
-            d_link = f'http://www.deezer.com/track/{str(did)}'
-            bot.send_message(message.chat.id, d_link)
-        else:
-            print(f"{artist} - {song} not found in deezer")
+    duration = message.voice.duration
+    if duration < 5:
+        bot.send_message(message.chat.id, 'The file is too short.')
+    elif duration > 30:
+        bot.send_message(message.chat.id, 'The file is too long.')
     else:
-        bot.send_message(message.chat.id, 'songs not found')
+        file_info = bot.get_file(message.voice.file_id)
+        file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}')
+        if file.status_code == 200:
+            with open(file_info.file_path, 'wb') as f:
+                for chunk in file:
+                    f.write(chunk)
 
+        recogn = ACRCloudRecognizer(config)
+        metadata = recogn.recognize_by_file(file_info.file_path, 0)
+        data = json.loads(metadata)
+
+        if data['status']['code'] == 0:
+            name_json = file_info.file_path.split('/')[1].split('.')[0]
+            with open(f'json/{name_json}.json', 'w', encoding='utf8') as outfile:
+                json.dump(data, outfile, indent=4, sort_keys=True)
+
+            artist = data['metadata']['music'][0]['artists'][0]['name']
+            song = data['metadata']['music'][0]['title']
+            if song.count(" - ") == 1:
+                    song, garbage = song.rsplit(" - ", 1)
+            song = re.sub("[(\[].*?[)\]]", "", song)
+            about = f"{artist} - {song}"
+            bot.send_message(message.chat.id, about)
+
+            genres = get_genres(data)
+            if genres != 'Classical':
+                send_lyrics(message, artist, song)
+                yid = media(data, 'youtube')
+                if yid is not None:
+                    y_link = 'https://www.youtube.com/watch?v=' + yid
+                    bot.send_message(message.chat.id, y_link)
+                else:
+                    y_link = get_youtube(artist, song)
+                    if y_link is not None:
+                        bot.send_message(message.chat.id, y_link)
+            else:
+                bot.send_message(message.chat.id, 'this is classical melody')
+
+            sid = media(data, 'spotify')
+            if sid is not None:
+                s_link = f'https://open.spotify.com/track/{sid}'
+                bot.send_message(message.chat.id, s_link)
+            else:
+                print(f"{artist} - {song} not found in spotify")
+
+            did = media(data, 'deezer')
+            if did is not None:
+                d_link = f'http://www.deezer.com/track/{str(did)}'
+                r = requests.get(d_link)
+                if r.status_code != 404:
+                    bot.send_message(message.chat.id, d_link)
+            else:
+                print(f"{artist} - {song} not found in deezer")
+        else:
+            bot.send_message(message.chat.id, 'songs not found')
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)

@@ -3,7 +3,7 @@ Music recognition bot for Telegram Messenger.
 
 It makes the process finding lyrics for any song as easy as ever.
 
-To find lyrics and translate send a voice or message in the formatin - Lyrics <song_name> - <artist_name>
+To find lyrics and translate send a voice or message in the formatin - **_Lyrics \<song\_name\> - \<artist\_name\>_**  
  
 # Screenshots
 
