@@ -8,10 +8,7 @@ from acrcloud.recognizer import ACRCloudRecognizer
 
 token = "Your token from Telegram"
 bot = telebot.TeleBot(token)
-
-# ACR cloud
 config = {
-    # Replace "xxxx xxxx" below with your project's host, access_key and access_secret.
     'host': 'XXXXXXXX',
     'access_key': 'XXXXXXXX',
     'access_secret': 'XXXXXXXX',
@@ -23,17 +20,23 @@ error = 'Could not find lyrics.'
 def reg(s):
     s = re.sub(r"[^\w\s]$", '', s)
     s = s.replace('$', 's')
-    s = s.replace("'", '')
-    s = re.sub(r"[-./\s\W]", '_', s).lower()
+    s = s.replace('&', 'and')
+    s = s.replace("'", '_')
+    s = re.sub(r"[-./\s\W]", '_', s)
+    s = s.replace("__", '_')
     return s
 
 
 def amalgama_lyrics(artist, song):
-    cn = artist[0].lower()
+    artist, song = artist.lower(), song.lower()
+    if 'the' in artist:
+        artist = artist[4:]
+        print(repr(artist))
+    cn = artist[0]
     link = f"http://www.amalgama-lab.com/songs/{cn}/{reg(artist)}/{reg(song)}.html"
     r = requests.get(link)
     if r.status_code != 404:
-        soup = BeautifulSoup(r.text, "html.parser")  # make soup that is parse-able by bs
+        soup = BeautifulSoup(r.text, "html.parser")
         s = ''
         for strong_tag in soup.find_all("div", class_="translate"):
             if '\n' in strong_tag.text:
@@ -170,7 +173,7 @@ def voice_processing(message):
             song = data['metadata']['music'][0]['title']
             if song.count(" - ") == 1:
                     song, garbage = song.rsplit(" - ", 1)
-            song = re.sub("[(\[].*?[)\]]", "", song)
+            song = re.sub("[(\[].*?[)\]]", "", song).strip()
             about = f"{artist} - {song}"
             bot.send_message(message.chat.id, about)
 
