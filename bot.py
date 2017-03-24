@@ -1,19 +1,27 @@
+import os
 import re
-from bs4 import BeautifulSoup
-import json
-import lyrics as minilyrics
+
 import requests
 import telebot
+from bs4 import BeautifulSoup
+from raven import Client
+
+import json
+import lyrics as minilyrics
 from acrcloud.recognizer import ACRCloudRecognizer
 
-token = "Your token from Telegram"
+client = Client(os.environ.get('SENTRY'))
+
+token = os.environ.get('TELEGRAM_TOKEN')
 bot = telebot.TeleBot(token)
+
 config = {
-    'host': 'XXXXXXXX',
-    'access_key': 'XXXXXXXX',
-    'access_secret': 'XXXXXXXX',
+    'host': os.environ.get('HOST'),
+    'access_key': os.environ.get('ACCESS_KEY'),
+    'access_secret': os.environ.get('ACCESS_SECRET'),
     'timeout': 5  # seconds
 }
+
 error = 'Could not find lyrics.'
 
 
@@ -25,27 +33,6 @@ def reg(s):
     s = re.sub(r"[-./\s\W]", '_', s)
     s = s.replace("__", '_')
     return s
-
-
-def amalgama_lyrics(artist, song):
-    artist, song = artist.lower(), song.lower()
-    if 'the' in artist:
-        artist = artist[4:]
-        print(repr(artist))
-    cn = artist[0]
-    link = f"http://www.amalgama-lab.com/songs/{cn}/{reg(artist)}/{reg(song)}.html"
-    r = requests.get(link)
-    if r.status_code != 404:
-        soup = BeautifulSoup(r.text, "html.parser")
-        s = ''
-        for strong_tag in soup.find_all("div", class_="translate"):
-            if '\n' in strong_tag.text:
-                s = s + strong_tag.text
-            else:
-                s = s + strong_tag.text + '\n'
-        return s + link
-    else:
-        print(f"translate {artist} - {song} not found")
 
 
 def get_genres(data):
@@ -93,9 +80,8 @@ def musixmatch(artist, song):
         lyrics = soup.text.split('"body":"')[1].split('","language"')[0]
         lyrics = lyrics.replace("\\n", "\n")
         lyrics = lyrics.replace("\\", "")
-        print(f"{artist} - {song} found in musixmatch")
     except Exception:
-        print(f"{artist} - {song} not found in musixmatch")
+        client.captureMessage(f"Lyrics {artist} - {song} not found in musixmatch")
         return error
     return lyrics + url
 
@@ -106,22 +92,48 @@ def wikia(artist, song):
     if lyrics != 'error':
         return lyrics + url
     else:
-        print(f"{artist} - {song} not found in wikia")
+        client.captureMessage(f"Lyrics {artist} - {song} not found in wikia")
         lyrics = musixmatch(artist, song)
         return lyrics
+
+
+def amalgama_lyrics(artist, song):
+    artist, song = artist.lower(), song.lower()
+    if 'the' in artist:
+        artist = artist[4:]
+    cn = artist[0]
+    link = f"http://www.amalgama-lab.com/songs/{cn}/{reg(artist)}/{reg(song)}.html"
+    r = requests.get(link)
+    if r.status_code != 404:
+        soup = BeautifulSoup(r.text, "html.parser")
+        s = ''
+        for strong_tag in soup.find_all("div", class_="translate"):
+            if '\n' in strong_tag.text:
+                s = s + strong_tag.text
+            else:
+                s = s + strong_tag.text + '\n'
+        return s + link
+    else:
+        client.captureMessage(f"translate {artist} - {song} not found in amalgama {link}")
 
 
 def send_lyrics(message, artist, song):
     lyrics_text = wikia(artist, song)
     try:
         bot.send_message(message.chat.id, lyrics_text)
-        lyrics_translate = amalgama_lyrics(artist, song)
+    except Exception:
+        bot.send_message(message.chat.id, 'Lyrics is too long')
+        client.captureMessage(f"Lyrics {artist} - {song} is too long")
+
+    lyrics_translate = amalgama_lyrics(artist, song)
+    try:
         if lyrics_translate is not None:
             bot.send_message(message.chat.id, lyrics_translate)
         else:
-            bot.send_message(message.chat.id, 'Translate not found')
+            bot.send_message(message.chat.id, 'Translate lyrics not found')
     except Exception:
-        bot.send_message(message.chat.id, 'Song text is too long')
+        bot.send_message(message.chat.id, 'Translate lyrics is too long')
+        client.captureMessage(f"Translate lyrics {artist} - {song} is too long")
 
 
 @bot.message_handler(content_types=['text'])
@@ -196,7 +208,7 @@ def voice_processing(message):
                 s_link = f'https://open.spotify.com/track/{sid}'
                 bot.send_message(message.chat.id, s_link)
             else:
-                print(f"{artist} - {song} not found in spotify")
+                client.captureMessage(f"{artist} - {song} not found in spotify")
 
             did = media(data, 'deezer')
             if did is not None:
@@ -205,7 +217,7 @@ def voice_processing(message):
                 if r.status_code != 404:
                     bot.send_message(message.chat.id, d_link)
             else:
-                print(f"{artist} - {song} not found in deezer")
+                client.captureMessage(f"{artist} - {song} not found in deezer")
         else:
             bot.send_message(message.chat.id, 'songs not found')
 
