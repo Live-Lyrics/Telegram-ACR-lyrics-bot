@@ -1,5 +1,5 @@
 *.py[cod]
 ENV/
 .idea/
-voice/
+try/
 __pycache__/

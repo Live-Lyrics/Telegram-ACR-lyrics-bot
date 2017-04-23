@@ -5,12 +5,14 @@ import requests
 import telebot
 from bs4 import BeautifulSoup
 from raven import Client
+from botanio import botan
 
 import json
 import lyrics as minilyrics
 from acrcloud.recognizer import ACRCloudRecognizer
 
 client = Client(os.environ.get('SENTRY'))
+botan_token = os.environ.get('BOTAN_API_KEY')
 
 token = os.environ.get('TELEGRAM_TOKEN')
 bot = telebot.TeleBot(token)
@@ -125,15 +127,20 @@ def send_lyrics(message, artist, song):
         bot.send_message(message.chat.id, 'Lyrics is too long')
         client.captureMessage(f"Lyrics {artist} - {song} is too long")
 
-    lyrics_translate = amalgama_lyrics(artist, song)
-    try:
-        if lyrics_translate is not None:
-            bot.send_message(message.chat.id, lyrics_translate)
-        else:
-            bot.send_message(message.chat.id, 'Translate lyrics not found')
-    except Exception:
-        bot.send_message(message.chat.id, 'Translate lyrics is too long')
-        client.captureMessage(f"Translate lyrics {artist} - {song} is too long")
+    if lyrics_text != error:
+        lyrics_translate = amalgama_lyrics(artist, song)
+        try:
+            if lyrics_translate is not None:
+                bot.send_message(message.chat.id, lyrics_translate)
+            else:
+                bot.send_message(message.chat.id, 'Translate lyrics not found')
+        except Exception:
+            bot.send_message(message.chat.id, 'Translate lyrics is too long')
+            client.captureMessage(f"Translate lyrics {artist} - {song} is too long")
+
+
+def check_chinese(artist):
+    return bool(re.findall('[\u4e00-\u9fff]+', artist))
 
 
 @bot.message_handler(content_types=['text'])
@@ -152,7 +159,11 @@ def handle_text(message):
         if " / " in song:
             song, garbage = song.rsplit(" / ", 1)
         song = re.sub(' \(.*?\)', '', song, flags=re.DOTALL)
-        send_lyrics(message, artist, song)
+
+        if check_chinese(artist):
+            bot.send_message(message.chat.id, 'Only English or Russian')
+        else:
+            send_lyrics(message, artist, song)
     else:
         bot.send_message(message.chat.id, "Just send me voice message and i'll try to recognize the song!")
 
@@ -161,9 +172,9 @@ def handle_text(message):
 def voice_processing(message):
     duration = message.voice.duration
     if duration < 5:
-        bot.send_message(message.chat.id, 'The file is too short.')
+        bot.send_message(message.chat.id, 'The voice message is too short.')
     elif duration > 30:
-        bot.send_message(message.chat.id, 'The file is too long.')
+        bot.send_message(message.chat.id, 'The voice message is too long.')
     else:
         file_info = bot.get_file(message.voice.file_id)
         file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}')
@@ -173,7 +184,7 @@ def voice_processing(message):
                     f.write(chunk)
 
         recogn = ACRCloudRecognizer(config)
-        metadata = recogn.recognize_by_file(file_info.file_path, 0)
+        metadata = recogn.recognize_by_file(file_info.file_path, 0, 5)
         data = json.loads(metadata)
 
         if data['status']['code'] == 0:
@@ -183,43 +194,50 @@ def voice_processing(message):
 
             artist = data['metadata']['music'][0]['artists'][0]['name']
             song = data['metadata']['music'][0]['title']
-            if song.count(" - ") == 1:
-                    song, garbage = song.rsplit(" - ", 1)
-            song = re.sub("[(\[].*?[)\]]", "", song).strip()
-            about = f"{artist} - {song}"
-            bot.send_message(message.chat.id, about)
 
-            genres = get_genres(data)
-            if genres != 'Classical':
-                send_lyrics(message, artist, song)
-                yid = media(data, 'youtube')
-                if yid is not None:
-                    y_link = 'https://www.youtube.com/watch?v=' + yid
-                    bot.send_message(message.chat.id, y_link)
-                else:
-                    y_link = get_youtube(artist, song)
-                    if y_link is not None:
+            if check_chinese(artist):
+                bot.send_message(message.chat.id, 'Only English or Russian')
+            else:
+                if song.count(" - ") == 1:
+                        song, garbage = song.rsplit(" - ", 1)
+                song = re.sub("[(\[].*?[)\]]", "", song).strip()
+                about = f"{artist} - {song}"
+                bot.send_message(message.chat.id, about)
+                botan.track(botan_token, uid=message.from_user.id, message=about, name=about)
+
+                genres = get_genres(data)
+                if genres != 'Classical':
+                    send_lyrics(message, artist, song)
+                    yid = media(data, 'youtube')
+                    if yid is not None:
+                        y_link = 'https://www.youtube.com/watch?v=' + yid
                         bot.send_message(message.chat.id, y_link)
-            else:
-                bot.send_message(message.chat.id, 'this is classical melody')
+                    else:
+                        y_link = get_youtube(artist, song)
+                        if y_link is not None:
+                            bot.send_message(message.chat.id, y_link)
+                else:
+                    bot.send_message(message.chat.id, 'this is classical melody')
 
-            sid = media(data, 'spotify')
-            if sid is not None:
-                s_link = f'https://open.spotify.com/track/{sid}'
-                bot.send_message(message.chat.id, s_link)
-            else:
-                client.captureMessage(f"{artist} - {song} not found in spotify")
+                sid = media(data, 'spotify')
+                if sid is not None:
+                    s_link = f'https://open.spotify.com/track/{sid}'
+                    bot.send_message(message.chat.id, s_link)
+                else:
+                    client.captureMessage(f"{artist} - {song} not found in spotify")
 
-            did = media(data, 'deezer')
-            if did is not None:
-                d_link = f'http://www.deezer.com/track/{str(did)}'
-                r = requests.get(d_link)
-                if r.status_code != 404:
-                    bot.send_message(message.chat.id, d_link)
-            else:
-                client.captureMessage(f"{artist} - {song} not found in deezer")
+                did = media(data, 'deezer')
+                if did is not None:
+                    d_link = f'http://www.deezer.com/track/{str(did)}'
+                    r = requests.get(d_link)
+                    if r.status_code != 404:
+                        bot.send_message(message.chat.id, d_link)
+                else:
+                    client.captureMessage(f"{artist} - {song} not found in deezer")
         else:
-            bot.send_message(message.chat.id, 'songs not found')
+            snf = 'songs not found'
+            bot.send_message(message.chat.id, snf)
+            botan.track(botan_token, uid=message.from_user.id, message=snf, name=snf)
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
