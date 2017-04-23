@@ -1,0 +1,81 @@
+{
+    "metadata": {
+        "music": [
+            {
+                "acrid": "df8589259e07aff4ee558e7aced72c99",
+                "album": {
+                    "name": "Paper Jam"
+                },
+                "artists": [
+                    {
+                        "name": "Fast Money Ferrari"
+                    }
+                ],
+                "duration_ms": 141454,
+                "external_ids": {
+                    "isrc": "TCACJ1507005",
+                    "upc": "859715744484"
+                },
+                "external_metadata": {
+                    "deezer": {
+                        "album": {
+                            "id": 11389468
+                        },
+                        "artists": [
+                            {
+                                "id": 9037958
+                            }
+                        ],
+                        "track": {
+                            "id": "109306944"
+                        }
+                    },
+                    "itunes": {
+                        "album": {
+                            "id": 1047781066
+                        },
+                        "artists": [
+                            {
+                                "id": 1047781067
+                            }
+                        ],
+                        "track": {
+                            "id": 1047781910
+                        }
+                    },
+                    "spotify": {
+                        "album": {
+                            "id": "07bOZ4diNIHkJAYMn0jCNN"
+                        },
+                        "artists": [
+                            {
+                                "id": "32T2YGgcIFoW5rWXonVbar"
+                            },
+                            {
+                                "id": "4Deu9SP9lu2z02o1KXpPFJ"
+                            }
+                        ],
+                        "track": {
+                            "id": "3OblhOFRgHTIi04sxIDa0z"
+                        }
+                    },
+                    "youtube": {
+                        "vid": "4431z4Y-LhU"
+                    }
+                },
+                "play_offset_ms": 50700,
+                "release_date": "2015-10-23",
+                "result_from": 1,
+                "score": 100,
+                "title": "Bad Bitch (feat. Denero)"
+            }
+        ],
+        "timestamp_utc": "2017-04-23 09:55:29"
+    },
+    "result_type": 1,
+    "status": {
+        "code": 0,
+        "msg": "Success",
+        "version": "1.0"
+    }
+}
