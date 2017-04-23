@@ -1,4 +1,6 @@
 # TrackID Bot
+[![Requirements Status](https://requires.io/github/andriyor/Telegram-ACR-lyrics-bot/requirements.svg?branch=master)](https://requires.io/github/andriyor/Telegram-ACR-lyrics-bot/requirements/?branch=master)
+
 Music recognition bot for Telegram Messenger. 
 
 It makes the process finding lyrics for any song as easy as ever.
