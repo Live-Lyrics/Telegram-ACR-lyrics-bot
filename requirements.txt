@@ -1,10 +1,11 @@
-appdirs==1.4.3
-beautifulsoup4==4.5.3
-botanio==1.0.0
-contextlib2==0.5.4
-packaging==16.8
-pyparsing==2.2.0
-pyTelegramBotAPI==2.3.1
-raven==6.0.0
-requests==2.13.0
-six==1.10.0
+beautifulsoup4==4.6.0
+certifi==2018.1.18
+chardet==3.0.4
+idna==2.6
+oauthlib==2.0.6
+-e git+https://github.com/andriyor/acrcloud_sdk_python.git#egg=acrcloud_sdk_python
+pyTelegramBotAPI==3.5.2
+raven==6.5.0
+requests==2.18.4
+six==1.11.0
+urllib3==1.22

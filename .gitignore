@@ -1,5 +1,2 @@
-*.py[cod]
 ENV/
 .idea/
-try/
-__pycache__/

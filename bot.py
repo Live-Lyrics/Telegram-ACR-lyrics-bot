@@ -5,19 +5,17 @@ import requests
 import telebot
 from bs4 import BeautifulSoup
 from raven import Client
-from botanio import botan
 
 import json
 import lyrics as minilyrics
 from acrcloud.recognizer import ACRCloudRecognizer
 
 client = Client(os.environ.get('SENTRY'))
-botan_token = os.environ.get('BOTAN_API_KEY')
 
 token = os.environ.get('TELEGRAM_TOKEN')
 bot = telebot.TeleBot(token)
 
-config = {
+acr_cloud_config = {
     'host': os.environ.get('HOST'),
     'access_key': os.environ.get('ACCESS_KEY'),
     'access_secret': os.environ.get('ACCESS_SECRET'),
@@ -183,7 +181,7 @@ def voice_processing(message):
                 for chunk in file:
                     f.write(chunk)
 
-        recogn = ACRCloudRecognizer(config)
+        recogn = ACRCloudRecognizer(acr_cloud_config)
         metadata = recogn.recognize_by_file(file_info.file_path, 0, 5)
         data = json.loads(metadata)
 
@@ -203,7 +201,6 @@ def voice_processing(message):
                 song = re.sub("[(\[].*?[)\]]", "", song).strip()
                 about = f"{artist} - {song}"
                 bot.send_message(message.chat.id, about)
-                botan.track(botan_token, uid=message.from_user.id, message=about, name=about)
 
                 genres = get_genres(data)
                 if genres != 'Classical':
@@ -237,7 +234,6 @@ def voice_processing(message):
         else:
             snf = 'songs not found'
             bot.send_message(message.chat.id, snf)
-            botan.track(botan_token, uid=message.from_user.id, message=snf, name=snf)
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
