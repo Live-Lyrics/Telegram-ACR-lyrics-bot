@@ -1,6 +1,8 @@
 import os
+from os.path import join, dirname
 import re
 
+from dotenv import load_dotenv
 import requests
 import telebot
 from bs4 import BeautifulSoup
@@ -9,6 +11,9 @@ from raven import Client
 import json
 import lyrics as minilyrics
 from acrcloud.recognizer import ACRCloudRecognizer
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 client = Client(os.environ.get('SENTRY'))
 
