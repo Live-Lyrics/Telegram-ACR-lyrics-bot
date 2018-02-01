@@ -17,8 +17,7 @@ load_dotenv(dotenv_path)
 
 client = Client(os.environ.get('SENTRY'))
 
-token = os.environ.get('TELEGRAM_TOKEN')
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST'))
 
 acr_cloud_config = {
     'host': os.environ.get('HOST'),
@@ -180,11 +179,10 @@ def voice_processing(message):
         bot.send_message(message.chat.id, 'The voice message is too long.')
     else:
         file_info = bot.get_file(message.voice.file_id)
-        file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}')
-        if file.status_code == 200:
-            with open(file_info.file_path, 'wb') as f:
-                for chunk in file:
-                    f.write(chunk)
+        file = bot.download_file(file_info.file_path)
+
+        with open(file_info.file_path, 'wb') as f:
+            f.write(file)
 
         recogn = ACRCloudRecognizer(acr_cloud_config)
         metadata = recogn.recognize_by_file(file_info.file_path, 0, 5)
