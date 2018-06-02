@@ -4,7 +4,6 @@ chardet==3.0.4
 click==6.7
 idna==2.6
 oauthlib==2.0.6
--e git+https://github.com/andriyor/acrcloud_sdk_python.git#egg=acrcloud_sdk_python
 pyTelegramBotAPI==3.5.2
 python-dotenv==0.7.1
 raven==6.5.0

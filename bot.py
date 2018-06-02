@@ -10,7 +10,7 @@ from raven import Client
 
 import json
 import lyrics as minilyrics
-from acrcloud.recognizer import ACRCloudRecognizer
+from acr_identify import fetch_metadata
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -18,14 +18,6 @@ load_dotenv(dotenv_path)
 client = Client(os.environ.get('SENTRY'))
 
 bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST'))
-
-acr_cloud_config = {
-    'host': os.environ.get('HOST'),
-    'access_key': os.environ.get('ACCESS_KEY'),
-    'access_secret': os.environ.get('ACCESS_SECRET'),
-    'timeout': 5  # seconds
-}
-
 error = 'Could not find lyrics.'
 
 
@@ -184,9 +176,7 @@ def voice_processing(message):
         with open(file_info.file_path, 'wb') as f:
             f.write(file)
 
-        recogn = ACRCloudRecognizer(acr_cloud_config)
-        metadata = recogn.recognize_by_file(file_info.file_path, 0, 5)
-        data = json.loads(metadata)
+        data = fetch_metadata(file_info.file_path)
 
         if data['status']['code'] == 0:
             name_json = file_info.file_path.split('/')[1].split('.')[0]
@@ -237,6 +227,7 @@ def voice_processing(message):
         else:
             snf = 'songs not found'
             bot.send_message(message.chat.id, snf)
+
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
