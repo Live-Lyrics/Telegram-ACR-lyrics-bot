@@ -179,8 +179,9 @@ def voice_processing(message):
         data = fetch_metadata(file_info.file_path)
 
         if data['status']['code'] == 0:
-            name_json = file_info.file_path.split('/')[1].split('.')[0]
-            with open(f'json/{name_json}.json', 'w', encoding='utf8') as outfile:
+            filename_w_ext = os.path.basename(file_info.file_path)
+            json_filename, file_extension = os.path.splitext(filename_w_ext)
+            with open(f'json/{json_filename}.json', 'w', encoding='utf8') as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
 
             artist = data['metadata']['music'][0]['artists'][0]['name']
@@ -230,4 +231,4 @@ def voice_processing(message):
 
 
 if __name__ == '__main__':
-    bot.polling(none_stop=True)
+    bot.infinity_polling(True)
