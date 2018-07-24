@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1eb360ec75aa61f5cc71a3069d93c939e1b3f703b10d1a3d09152af9c46551c6"
+            "sha256": "855a60de9e6e3ef0706b554a97166b1f662b0d167da9590c5151cad6b934f888"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,10 @@
         ]
     },
     "default": {
+        "amalgama-pq": {
+            "git": "https://github.com/andriyor/amalgama-pq.git",
+            "ref": "64ba1f85e2bcbd1980eaf0394f6db680b0375ddd"
+        },
         "beautifulsoup4": {
             "hashes": [
                 "sha256:11a9a27b7d3bddc6d86f59fb76afb70e921a25ac2d6cc55b40d072bd68435a76",
@@ -38,6 +42,14 @@
                 "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
             ],
             "version": "==3.0.4"
+        },
+        "contextlib2": {
+            "hashes": [
+                "sha256:509f9419ee91cdd00ba34443217d5ca51f5a364a404e1dce9e8979cea969ca48",
+                "sha256:f5260a6e679d2ff42ec91ec5252f4eeffdcf21053db9113bd0a8e4d953769c00"
+            ],
+            "markers": "python_version < '3.2'",
+            "version": "==0.5.5"
         },
         "idna": {
             "hashes": [
@@ -89,6 +101,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
+            "markers": "python_version != '3.2.*' and python_version != '3.3.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version < '4' and python_version >= '2.6'",
             "version": "==1.23"
         }
     },

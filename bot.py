@@ -7,6 +7,7 @@ import requests
 import telebot
 from bs4 import BeautifulSoup
 from raven import Client
+from amalgama import amalgama
 
 import json
 import lyrics as minilyrics
@@ -21,14 +22,8 @@ bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST'))
 error = 'Could not find lyrics.'
 
 
-def reg(s):
-    s = re.sub(r"[^\w\s]$", '', s)
-    s = s.replace('$', 's')
-    s = s.replace('&', 'and')
-    s = s.replace("'", '_')
-    s = re.sub(r"[-./\s\W]", '_', s)
-    s = s.replace("__", '_')
-    return s
+def handle_request(user):
+    client.user_context({'id': user.id, 'username': user.username})
 
 
 def get_genres(data):
@@ -77,8 +72,7 @@ def musixmatch(artist, song):
         lyrics = lyrics.replace("\\n", "\n")
         lyrics = lyrics.replace("\\", "")
     except Exception:
-        client.captureMessage(f"Lyrics {artist} - {song} not found in musixmatch")
-        return error
+        return None
     return lyrics + url
 
 
@@ -88,49 +82,40 @@ def wikia(artist, song):
     if lyrics != 'error':
         return lyrics + url
     else:
-        client.captureMessage(f"Lyrics {artist} - {song} not found in wikia")
-        lyrics = musixmatch(artist, song)
-        return lyrics
+        return None
 
 
 def amalgama_lyrics(artist, song):
-    artist, song = artist.lower(), song.lower()
-    if 'the' in artist:
-        artist = artist[4:]
-    cn = artist[0]
-    link = f"http://www.amalgama-lab.com/songs/{cn}/{reg(artist)}/{reg(song)}.html"
-    r = requests.get(link)
-    if r.status_code != 404:
-        soup = BeautifulSoup(r.text, "html.parser")
-        s = ''
-        for strong_tag in soup.find_all("div", class_="translate"):
-            if '\n' in strong_tag.text:
-                s = s + strong_tag.text
-            else:
-                s = s + strong_tag.text + '\n'
-        return s + link
-    else:
-        client.captureMessage(f"translate {artist} - {song} not found in amalgama {link}")
+    url = amalgama.get_url(artist, song)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError:
+        client.captureMessage(f'{artist}-{song} not found in amalgama {url}')
+        return None
+    text = amalgama.get_first_translate_text(response.text)
+    return f'{text}{url}'
 
 
 def send_lyrics(message, artist, song):
     lyrics_text = wikia(artist, song)
-    try:
-        bot.send_message(message.chat.id, lyrics_text)
-    except Exception:
-        bot.send_message(message.chat.id, 'Lyrics is too long')
-        client.captureMessage(f"Lyrics {artist} - {song} is too long")
+    if lyrics_text is None:
+        handle_request(message.from_user)
+        client.captureMessage(f"Lyrics {artist} - {song} not found in wikia")
+        lyrics_text = musixmatch(artist, song)
+    if lyrics_text is None:
+        bot.send_message(message.chat.id, 'Could not find lyrics')
+        handle_request(message.from_user)
+        client.captureMessage(f"Lyrics {artist} - {song} not found in musixmatch")
+        return None
 
-    if lyrics_text != error:
+    if lyrics_text:
+        bot.send_message(message.chat.id, lyrics_text)
         lyrics_translate = amalgama_lyrics(artist, song)
-        try:
-            if lyrics_translate is not None:
-                bot.send_message(message.chat.id, lyrics_translate)
-            else:
-                bot.send_message(message.chat.id, 'Translate lyrics not found')
-        except Exception:
-            bot.send_message(message.chat.id, 'Translate lyrics is too long')
-            client.captureMessage(f"Translate lyrics {artist} - {song} is too long")
+        if lyrics_translate is None:
+            bot.send_message(message.chat.id, 'Translate lyrics not found')
+        else:
+            bot.send_message(message.chat.id, lyrics_translate)
 
 
 def check_chinese(artist):

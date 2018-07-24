@@ -28,4 +28,4 @@ def LyricWikia(artist, title):
         [elem.extract() for elem in soup.findAll('script')]
         return soup.getText()
     else:
-        return "error"
+        return None
