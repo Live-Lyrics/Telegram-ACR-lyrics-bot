@@ -18,7 +18,7 @@
     "default": {
         "amalgama-pq": {
             "git": "https://github.com/andriyor/amalgama-pq.git",
-            "ref": "64ba1f85e2bcbd1980eaf0394f6db680b0375ddd"
+            "ref": "86eb3364ed3c2ad60c6c4eca969b4b2a4e6cb6f1"
         },
         "beautifulsoup4": {
             "hashes": [
@@ -43,14 +43,6 @@
             ],
             "version": "==3.0.4"
         },
-        "contextlib2": {
-            "hashes": [
-                "sha256:509f9419ee91cdd00ba34443217d5ca51f5a364a404e1dce9e8979cea969ca48",
-                "sha256:f5260a6e679d2ff42ec91ec5252f4eeffdcf21053db9113bd0a8e4d953769c00"
-            ],
-            "markers": "python_version < '3.2'",
-            "version": "==0.5.5"
-        },
         "idna": {
             "hashes": [
                 "sha256:156a6814fb5ac1fc6850fb002e0852d56c0c8d2531923a51032d1b70760e186e",
@@ -60,10 +52,10 @@
         },
         "pytelegrambotapi": {
             "hashes": [
-                "sha256:79ba09316ba9b01a0b2c3bf937d8cf57b33072c1caead7a6dc010956683cef5e"
+                "sha256:08b3412d3fb2d64d2d3dcd3849828662cf580a7ea3c4443abca2a9feae1f8515"
             ],
             "index": "pypi",
-            "version": "==3.6.3"
+            "version": "==3.6.4"
         },
         "python-dotenv": {
             "hashes": [
@@ -101,7 +93,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.2.*' and python_version != '3.3.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version < '4' and python_version >= '2.6'",
+            "markers": "python_version != '3.3.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.0.*' and python_version < '4' and python_version >= '2.6'",
             "version": "==1.23"
         }
     },
