@@ -115,7 +115,11 @@ def send_lyrics(message, artist, song):
         if lyrics_translate is None:
             bot.send_message(message.chat.id, 'Translate lyrics not found')
         else:
-            bot.send_message(message.chat.id, lyrics_translate)
+            try:
+                bot.send_message(message.chat.id, lyrics_translate)
+            except telebot.apihelper.ApiException as e:
+                bot.send_message(message.chat.id, 'Translate is too long ')
+                client.captureMessage(f"Translate {artist} - {song} is too long {e}")
 
 
 def check_chinese(artist):
