@@ -9,7 +9,7 @@ requests = "*"
 raven = "*"
 python-dotenv = "*"
 "beautifulsoup4" = "*"
-amalgama-pq = {git = "https://github.com/andriyor/amalgama-pq.git"}
+amalgama-pq = {git = "https://github.com/andriyor/amalgama-pq.git", editable = true}
 google-measurement-protocol = "*"
 
 [dev-packages]
