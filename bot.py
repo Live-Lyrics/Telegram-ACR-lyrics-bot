@@ -1,15 +1,16 @@
 import os
 from os.path import join, dirname
 import re
+import json
 
 from dotenv import load_dotenv
 import requests
 import telebot
 from bs4 import BeautifulSoup
 from raven import Client
-from amalgama import amalgama
+from google_measurement_protocol import event, report
 
-import json
+import amalgama
 import lyrics as minilyrics
 from acr_identify import fetch_metadata
 
@@ -20,6 +21,9 @@ client = Client(os.environ.get('SENTRY'))
 
 bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST'))
 error = 'Could not find lyrics.'
+
+ANALYTICS_ACCOUNT_ID = os.environ.get('ANALYTICS_ACCOUNT_ID')
+ANALYTICS_TRACKING_ID = os.environ.get('ANALYTICS_TRACKING_ID')
 
 
 def handle_request(user):
@@ -128,6 +132,9 @@ def check_chinese(artist):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
+    data = event('voice', 'send_text')
+    report(ANALYTICS_TRACKING_ID, ANALYTICS_ACCOUNT_ID, data)
+
     first_word = message.text.split(' ', 1)[0]
     if first_word.lower() == 'lyrics':
         artist = ""
@@ -153,6 +160,9 @@ def handle_text(message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
+    data = event('voice', 'send_voice')
+    report(ANALYTICS_TRACKING_ID, ANALYTICS_ACCOUNT_ID, data)
+
     duration = message.voice.duration
     if duration < 5:
         bot.send_message(message.chat.id, 'The voice message is too short.')
