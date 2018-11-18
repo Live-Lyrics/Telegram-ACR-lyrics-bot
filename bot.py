@@ -95,7 +95,7 @@ def amalgama_lyrics(artist, song):
         response = requests.get(url)
         response.raise_for_status()
     except requests.exceptions.HTTPError:
-        client.captureMessage(f'{artist}-{song} not found in amalgama {url}')
+        client.captureMessage(f'{artist} - {song} not found in amalgama {url}')
         return None
     text = amalgama.get_first_translate_text(response.text)
     return f'{text}{url}'
