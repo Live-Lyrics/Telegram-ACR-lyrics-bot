@@ -14,7 +14,7 @@ from acr_identify import fetch_metadata
 
 client = Client(os.environ.get('SENTRY'))
 
-bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST'))
+bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST_AUD'))
 error = 'Could not find lyrics.'
 
 ANALYTICS_ACCOUNT_ID = os.environ.get('ANALYTICS_ACCOUNT_ID')
@@ -166,16 +166,17 @@ def voice_processing(message):
     else:
         file_info = bot.get_file(message.voice.file_id)
         file = bot.download_file(file_info.file_path)
+        my_file_path = f"bot/{file_info.file_path}"
 
-        with open(file_info.file_path, 'wb') as f:
+        with open(my_file_path, 'wb') as f:
             f.write(file)
 
-        data = fetch_metadata(file_info.file_path)
+        data = fetch_metadata(my_file_path)
 
         if data['status']['code'] == 0:
             filename_w_ext = os.path.basename(file_info.file_path)
             json_filename, file_extension = os.path.splitext(filename_w_ext)
-            with open(f'json/{json_filename}.json', 'w', encoding='utf8') as outfile:
+            with open(f'bot/json/{json_filename}.json', 'w', encoding='utf8') as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
 
             artist = data['metadata']['music'][0]['artists'][0]['name']
