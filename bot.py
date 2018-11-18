@@ -1,9 +1,7 @@
 import os
-from os.path import join, dirname
 import re
 import json
 
-from dotenv import load_dotenv
 import requests
 import telebot
 from bs4 import BeautifulSoup
@@ -13,9 +11,6 @@ from google_measurement_protocol import event, report
 import amalgama
 import lyrics as minilyrics
 from acr_identify import fetch_metadata
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
 
 client = Client(os.environ.get('SENTRY'))
 
