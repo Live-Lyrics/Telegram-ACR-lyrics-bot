@@ -10,12 +10,16 @@ from google_measurement_protocol import event, report
 
 import amalgama
 import lyrics as minilyrics
-from acr_identify import fetch_metadata
+from acrcloud import ACRCloud
 
 client = Client(os.environ.get('SENTRY'))
 
 bot = telebot.TeleBot(os.environ.get('TELEGRAM_TOKEN_TEST_AUD'))
 error = 'Could not find lyrics.'
+
+ACR_access_key = os.environ.get('ACR_ACCESS_KEY')
+ACR_access_secret = bytes(os.environ.get('ACR_ACCESS_SECRET'), 'utf-8')
+acr = ACRCloud('eu-west-1.api.acrcloud.com', ACR_access_key, ACR_access_secret)
 
 ANALYTICS_ACCOUNT_ID = os.environ.get('ANALYTICS_ACCOUNT_ID')
 ANALYTICS_TRACKING_ID = os.environ.get('ANALYTICS_TRACKING_ID')
@@ -171,7 +175,7 @@ def voice_processing(message):
         with open(my_file_path, 'wb') as f:
             f.write(file)
 
-        data = fetch_metadata(my_file_path)
+        data = acr.identify(my_file_path)
 
         if data['status']['code'] == 0:
             filename_w_ext = os.path.basename(file_info.file_path)

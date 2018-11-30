@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7e79e8b6d37d43d6fd3c1919741b91e9c270bf84433caaf5f3c88c73149e7bc0"
+            "sha256": "79f662a1f0c9f2d06e3674e5a12ddd450065364ee43a84d52d62d22bc55c8e44"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -14,6 +14,11 @@
         ]
     },
     "default": {
+        "acrcloud-py": {
+            "editable": true,
+            "git": "https://github.com/andriyor/acrcloud-py.git",
+            "ref": "549e9a783d9881d732e305ea48d273ed506b88e5"
+        },
         "amalgama-pq": {
             "editable": true,
             "git": "https://github.com/andriyor/amalgama-pq.git",
@@ -37,10 +42,10 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:339dc09518b07e2fa7eda5450740925974815557727d6bd35d319c1524a04a4c",
-                "sha256:6d58c986d22b038c8c0df30d639f23a3e6d172a05c3583e766f4c0b785c0986a"
+                "sha256:47f9c83ef4c0c621eaef743f133f09fa8a74a9b75f037e8624f83bd1b6626cb7",
+                "sha256:993f830721089fef441cdfeb4b2c8c9df86f0c63239f06bd025a76a7daddb033"
             ],
-            "version": "==2018.10.15"
+            "version": "==2018.11.29"
         },
         "chardet": {
             "hashes": [
@@ -145,7 +150,6 @@
                 "sha256:65b3a120e4329e33c9889db89c80976c5272f56ea92d3e74da8a463992e3ff54",
                 "sha256:ea881206e59f41dbd0bd445437d792e43906703fff75ca8ff43ccdb11f33f263"
             ],
-            "index": "pypi",
             "version": "==2.20.1"
         },
         "six": {
