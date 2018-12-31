@@ -8,6 +8,6 @@ pytelegrambotapi = "*"
 requests = "*"
 raven = "*"
 "beautifulsoup4" = "*"
-amalgama-pq = {git = "https://github.com/andriyor/amalgama-pq.git",editable = true}
 google-measurement-protocol = "*"
 acrcloud-py = {editable = true,git = "https://github.com/andriyor/acrcloud-py.git"}
+amalgama = "*"
