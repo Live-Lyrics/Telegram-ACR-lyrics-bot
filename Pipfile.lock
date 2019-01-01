@@ -21,11 +21,11 @@
         },
         "amalgama": {
             "hashes": [
-                "sha256:9c94f67f02593de81d04235971ba3f4af3d6c401df13661157be53b66fd57107",
-                "sha256:ee512b2a3afba302766cf3ffa2a4f6da4d9f1c58d127aed83222e3ed51ac54c2"
+                "sha256:8a8a5c69acccf5428d012c1bdc8e600601fdd652188ef04357656a1046ebdc2e",
+                "sha256:b8eda45cdc73412a0267d8766837f226c94d48dc1e67728f8d70b4f57a23057a"
             ],
             "index": "pypi",
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "babel": {
             "hashes": [
@@ -153,6 +153,7 @@
                 "sha256:502a824f31acdacb3a35b6690b5fbf0bc41d63a24a45c4004352b0242707598e",
                 "sha256:7bf2a778576d825600030a110f3c0e3e8edc51dfaafe1c146e39a2027784957b"
             ],
+            "index": "pypi",
             "version": "==2.21.0"
         },
         "six": {
