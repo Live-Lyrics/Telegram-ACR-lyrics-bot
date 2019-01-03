@@ -9,5 +9,5 @@ requests = "*"
 raven = "*"
 "beautifulsoup4" = "*"
 google-measurement-protocol = "*"
-acrcloud-py = {editable = true,git = "https://github.com/andriyor/acrcloud-py.git"}
 amalgama = "*"
+acr-cloud = "*"

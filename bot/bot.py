@@ -10,7 +10,7 @@ from google_measurement_protocol import event, report
 
 import amalgama
 import lyrics as minilyrics
-from acrcloud import ACRCloud
+from acr_cloud import ACRCloud
 
 client = Client(os.environ.get('SENTRY'))
 
