@@ -24,11 +24,11 @@
         },
         "amalgama": {
             "hashes": [
-                "sha256:8564a150b7cb11ad6ba8eb6295ef1b7ae698eb73260d47adf72807d62c4b7bb7",
-                "sha256:d5c26216f8ce5dfe08423f6b457a93b03e08c19f18cb8e0cbfda7cd470077c67"
+                "sha256:6f4decc4c2472673322cc84325c1c52f56f6b348ec000580068c3a8ef2a774a0",
+                "sha256:92db1c978392756456f5e21900f4e0323b43fe4801fba485f7a7ddf9cf7def3f"
             ],
             "index": "pypi",
-            "version": "==0.1.4"
+            "version": "==0.2.1"
         },
         "babel": {
             "hashes": [
@@ -136,6 +136,12 @@
             "index": "pypi",
             "version": "==3.6.6"
         },
+        "python-slugify": {
+            "hashes": [
+                "sha256:d3e034397236020498e677a35e5c05dcc6ba1624b608b9ef7e5fe3090ccbd5a8"
+            ],
+            "version": "==2.0.1"
+        },
         "pytz": {
             "hashes": [
                 "sha256:31cb35c89bd7d333cd32c5f278fca91b523b0834369e757f4c5641ea252236ca",
@@ -168,10 +174,10 @@
         },
         "soupsieve": {
             "hashes": [
-                "sha256:057e08f362a255b457a5781675211556799ed3bb8807506eaac3809390bc304b",
-                "sha256:f7d99b41637be2f249dfcc06ae93c13fcbbdfa7bb68b15308cdd0734e58146f1"
+                "sha256:638535780f7b966411123d56eb3b89cd1d2e42d707270c6d7d053c7720a238f3",
+                "sha256:cb61b59c55f9f6e91928a03fe4b500ac1fcef6f8e68082a630db098ab33e2126"
             ],
-            "version": "==1.6.1"
+            "version": "==1.6.2"
         },
         "typing": {
             "hashes": [
@@ -180,6 +186,13 @@
                 "sha256:a4c8473ce11a65999c8f59cb093e70686b6c84c98df58c1dae9b3b196089858a"
             ],
             "version": "==3.6.6"
+        },
+        "unidecode": {
+            "hashes": [
+                "sha256:092cdf7ad9d1052c50313426a625b717dab52f7ac58f859e09ea020953b1ad8f",
+                "sha256:8b85354be8fd0c0e10adbf0675f6dc2310e56fda43fa8fe049123b6c475e52fb"
+            ],
+            "version": "==1.0.23"
         },
         "urllib3": {
             "hashes": [
