@@ -3,4 +3,4 @@ RUN        pip install pipenv
 WORKDIR    /usr/src/app
 COPY       . .
 RUN        pipenv install
-CMD        ["pipenv", "run", "python", "./bot.py"]
+CMD        ["pipenv", "run", "python", "bot/bot.py"]

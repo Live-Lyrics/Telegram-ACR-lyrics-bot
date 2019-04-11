@@ -1,0 +1,23 @@
+-i https://pypi.org/simple
+acr-cloud==0.1.1
+amalgama==0.2.1
+babel==2.6.0
+beautifulsoup4==4.7.1
+certifi==2019.3.9
+chardet==3.0.4
+cssselect==1.0.3
+google-measurement-protocol==1.0.0
+idna==2.8
+lxml==4.3.3
+prices==1.0.0
+pyquery==1.4.0
+pytelegrambotapi==3.6.6
+python-slugify==2.0.1
+pytz==2019.1
+raven==6.10.0
+requests==2.21.0
+six==1.12.0
+soupsieve==1.9
+typing==3.6.6
+unidecode==1.0.23
+urllib3==1.24.1
