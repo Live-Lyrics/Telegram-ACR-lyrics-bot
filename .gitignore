@@ -2,3 +2,6 @@
 .env
 example
 /acr_identify
+bot/json
+bot/voice
+music

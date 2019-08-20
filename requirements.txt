@@ -1,23 +1,28 @@
--i https://pypi.org/simple
-acr-cloud==0.1.1
-amalgama==0.2.1
-babel==2.6.0
-beautifulsoup4==4.7.1
-certifi==2019.3.9
+acr-cloud==0.1.2
+-e git+https://github.com/andriyor/acrcloud-py.git@549e9a783d9881d732e305ea48d273ed506b88e5#egg=acrcloud
+amalgama==0.2.2
+-e git+https://github.com/andriyor/amalgama-pq.git@589218e95edb58d3ed084ffc286444470d920264#egg=amalgama_pq
+Babel==2.7.0
+beautifulsoup4==4.8.0
+certifi==2019.6.16
 chardet==3.0.4
-cssselect==1.0.3
+cssselect==1.1.0
 google-measurement-protocol==1.0.0
 idna==2.8
-lxml==4.3.3
+lxml==4.4.1
+pipenv==2018.11.14
 prices==1.0.0
 pyquery==1.4.0
-pytelegrambotapi==3.6.6
+pyTelegramBotAPI==3.6.6
+python-dotenv==0.10.3
 python-slugify==2.0.1
-pytz==2019.1
+pytz==2019.2
 raven==6.10.0
-requests==2.21.0
+requests==2.22.0
 six==1.12.0
-soupsieve==1.9
-typing==3.6.6
-unidecode==1.0.23
-urllib3==1.24.1
+soupsieve==1.9.3
+typing==3.7.4
+Unidecode==1.1.1
+urllib3==1.25.3
+virtualenv==16.1.0
+virtualenv-clone==0.4.0

@@ -11,6 +11,8 @@ from google_measurement_protocol import event, report
 import amalgama
 import lyrics as minilyrics
 from acr_cloud import ACRCloud
+from dotenv import load_dotenv
+load_dotenv()
 
 client = Client(os.environ.get('SENTRY'))
 
